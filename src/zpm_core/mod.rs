@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::{Read, Write};
 
+pub mod commands;
 mod constants;
+mod executor;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
@@ -49,7 +51,7 @@ impl Config {
         let general = General::new(name);
         Config {
             general,
-            crypto: Crypto::default()
+            crypto: Crypto::default(),
         }
     }
 
