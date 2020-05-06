@@ -1,3 +1,5 @@
+pub(crate) const ZOKRATES_BIN: &'static str = "zokrates";
+
 // general
 pub const DEFAULT_TARGET_DIR: &str = "target";
 pub const DEFAULT_SOURCE_DIR: &str = "src";

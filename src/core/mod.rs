@@ -2,9 +2,8 @@ use serde::{Deserialize, Serialize};
 use std::io;
 use std::io::{Read, Write};
 
-pub mod commands;
-mod constants;
-mod executor;
+pub mod constants;
+pub mod executor;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {

@@ -1,3 +1,4 @@
+use crate::core::constants::ZOKRATES_BIN;
 use std::fmt;
 use std::process::Command as ProcessCommand;
 
@@ -8,7 +9,7 @@ pub struct Command<'a> {
 
 pub struct Argument<'a> {
     key: &'a str,
-    value: &'a str,
+    value: Option<&'a str>,
 }
 
 impl<'a> Command<'a> {
@@ -18,7 +19,7 @@ impl<'a> Command<'a> {
 }
 
 impl<'a> Argument<'a> {
-    pub fn new(key: &'a str, value: &'a str) -> Self {
+    pub fn new(key: &'a str, value: Option<&'a str>) -> Self {
         Argument { key, value }
     }
 }
@@ -40,7 +41,10 @@ impl fmt::Display for Command<'_> {
 
 impl fmt::Display for Argument<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{} {}", self.key, self.value)
+        match self.value {
+            Some(_) => write!(f, "{} {}", self.key, self.value.unwrap()),
+            None => write!(f, "{}", self.key),
+        }
     }
 }
 
@@ -52,15 +56,18 @@ impl Executor {
         args.append(
             cmd.args
                 .iter()
-                .map(|a| vec![a.key, a.value])
+                .map(|a| match a.value {
+                    Some(_) => vec![a.key, a.value.unwrap()],
+                    None => vec![a.key],
+                })
                 .flatten()
                 .collect::<Vec<&str>>()
                 .as_mut(),
         );
 
-        info!("zokrates {}", cmd);
+        info!("{} {}", ZOKRATES_BIN, cmd);
 
-        let mut child = ProcessCommand::new("zokrates")
+        let mut child = ProcessCommand::new(ZOKRATES_BIN)
             .args(args)
             .spawn()
             .expect("Could not spawn child process");

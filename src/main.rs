@@ -2,17 +2,24 @@
 extern crate log;
 extern crate pretty_env_logger;
 
-mod zpm_core;
-
 use clap::{App, AppSettings, Arg, SubCommand};
 use std::env;
 use std::io::BufReader;
 
-use crate::zpm_core::commands::compile::CompileCommand;
-use crate::zpm_core::commands::init::InitCommand;
+mod core;
+mod ops;
+
+use crate::ops::clean::clean;
+use crate::ops::compile::compile;
+use crate::ops::compute::compute;
+use crate::ops::create::create;
+use crate::ops::export_verifier::export_verifier;
+use crate::ops::generate_proof::generate_proof;
+use crate::ops::setup::setup;
+
+use crate::core::Config;
 use std::fs::File;
 use std::path::{Path, PathBuf};
-use zpm_core::Config;
 
 fn main() {
     pretty_env_logger::formatted_builder()
@@ -33,7 +40,7 @@ fn check_path_env(path: &str) -> Result<bool, String> {
                 .map(|p| format!("{}/{}", p, path))
                 .any(|p| Path::new(&p).exists()))
         })
-        .map_err(|e| format!("{}", e))
+        .map_err(|e| format!("Error in $PATH: {}", e))
 }
 
 fn read_config(path: &str) -> Result<Config, String> {
@@ -65,8 +72,8 @@ fn cli() -> Result<(), String> {
                 .default_value(CONFIG_DEFAULT_PATH),
         )
         .subcommand(
-            SubCommand::with_name("init")
-                .about("Initialize new project")
+            SubCommand::with_name("create")
+                .about("Creates new project")
                 .display_order(0)
                 .arg(
                     Arg::with_name("name")
@@ -78,8 +85,42 @@ fn cli() -> Result<(), String> {
         )
         .subcommand(
             SubCommand::with_name("compile")
-                .about("Compile the project")
+                .about("Compiles the project")
                 .display_order(1),
+        )
+        .subcommand(
+            SubCommand::with_name("setup")
+                .about("Performs a trusted setup for a given constraint system")
+                .display_order(2),
+        )
+        .subcommand(
+            SubCommand::with_name("compute")
+                .about("Calculates a witness for a given constraint system")
+                .display_order(3)
+                .arg(
+                    Arg::with_name("arguments")
+                        .short("a")
+                        .long("arguments")
+                        .help("Arguments for the compiled program")
+                        .takes_value(true)
+                        .multiple(true)
+                        .required(false),
+                ),
+        )
+        .subcommand(
+            SubCommand::with_name("export-verifier")
+                .about("Exports a verifier as Solidity smart contract")
+                .display_order(4),
+        )
+        .subcommand(
+            SubCommand::with_name("generate-proof")
+                .about("Calculates a proof for a given constraint system and witness")
+                .display_order(5),
+        )
+        .subcommand(
+            SubCommand::with_name("clean")
+                .about("Cleans target directory")
+                .display_order(6),
         )
         .get_matches();
 
@@ -89,18 +130,50 @@ fn cli() -> Result<(), String> {
     }?;
 
     match matches.subcommand() {
-        ("init", Some(sub_matches)) => {
+        ("create", Some(sub_matches)) => {
             let name = sub_matches.value_of("name").unwrap();
-            info!("Creating {}", name);
-
             let config = Config::new(name.to_string());
-            InitCommand::run(config)?
+
+            create(config)?
         }
-        ("compile", Some(_sub_matches)) => {
+        ("compile", _) => {
             let config: Config = read_config(matches.value_of("config-path").unwrap())
                 .map_err(|e| format!("{}", e))?;
 
-            CompileCommand::run(config)?
+            compile(config)?
+        }
+        ("setup", _) => {
+            let config: Config = read_config(matches.value_of("config-path").unwrap())
+                .map_err(|e| format!("{}", e))?;
+
+            setup(config)?
+        }
+        ("compute", Some(sub_matches)) => {
+            let config: Config = read_config(matches.value_of("config-path").unwrap())
+                .map_err(|e| format!("{}", e))?;
+
+            match sub_matches.values_of("arguments") {
+                Some(values) => compute(config, Some(values.collect()))?,
+                None => compute(config, None)?,
+            }
+        }
+        ("export-verifier", _) => {
+            let config: Config = read_config(matches.value_of("config-path").unwrap())
+                .map_err(|e| format!("{}", e))?;
+
+            export_verifier(config)?
+        }
+        ("generate-proof", _) => {
+            let config: Config = read_config(matches.value_of("config-path").unwrap())
+                .map_err(|e| format!("{}", e))?;
+
+            generate_proof(config)?
+        }
+        ("clean", _) => {
+            let config: Config = read_config(matches.value_of("config-path").unwrap())
+                .map_err(|e| format!("{}", e))?;
+
+            clean(config)?
         }
         _ => unreachable!(),
     }
