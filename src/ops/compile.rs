@@ -16,7 +16,8 @@ pub fn compile(config: Config) -> Result<(), String> {
     let input = Argument::new("-i", Some(input.to_str().unwrap()));
     let output = Argument::new("-o", Some(output.to_str().unwrap()));
     let abi_spec = Argument::new("-s", Some(abi_spec.to_str().unwrap()));
+    let curve = Argument::new("-c", Some(config.crypto.elliptic_curve.as_str()));
 
-    let cmd = Command::new("compile", vec![input, output, abi_spec]);
+    let cmd = Command::new("compile", vec![input, output, abi_spec, curve]);
     Executor::execute(cmd)
 }
