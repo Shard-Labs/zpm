@@ -17,6 +17,7 @@ use crate::ops::export_verifier::export_verifier;
 use crate::ops::generate_proof::generate_proof;
 use crate::ops::setup::setup;
 
+use crate::core::constants::CONFIG_DEFAULT_PATH;
 use crate::core::Config;
 use std::fs::File;
 use std::path::{Path, PathBuf};
@@ -54,8 +55,6 @@ fn read_config(path: &str) -> Result<Config, String> {
 }
 
 fn cli() -> Result<(), String> {
-    const CONFIG_DEFAULT_PATH: &str = "config.zcf";
-
     let matches = App::new("zpm")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .version(env!("CARGO_PKG_VERSION"))
@@ -105,6 +104,13 @@ fn cli() -> Result<(), String> {
                         .takes_value(true)
                         .multiple(true)
                         .required(false),
+                )
+                .arg(
+                    Arg::with_name("stdin")
+                        .long("stdin")
+                        .help("Read arguments from stdin")
+                        .conflicts_with("arguments")
+                        .required(false),
                 ),
         )
         .subcommand(
@@ -148,15 +154,7 @@ fn cli() -> Result<(), String> {
 
             setup(config)?
         }
-        ("compute", Some(sub_matches)) => {
-            let config: Config = read_config(matches.value_of("config-path").unwrap())
-                .map_err(|e| format!("{}", e))?;
-
-            match sub_matches.values_of("arguments") {
-                Some(values) => compute(config, Some(values.collect()))?,
-                None => compute(config, None)?,
-            }
-        }
+        ("compute", Some(sub_matches)) => compute(sub_matches)?,
         ("export-verifier", _) => {
             let config: Config = read_config(matches.value_of("config-path").unwrap())
                 .map_err(|e| format!("{}", e))?;
@@ -169,12 +167,7 @@ fn cli() -> Result<(), String> {
 
             generate_proof(config)?
         }
-        ("clean", _) => {
-            let config: Config = read_config(matches.value_of("config-path").unwrap())
-                .map_err(|e| format!("{}", e))?;
-
-            clean(config)?
-        }
+        ("clean", _) => clean()?,
         _ => unreachable!(),
     }
 

@@ -1,6 +1,7 @@
 use crate::core::constants::ZOKRATES_BIN;
 use std::fmt;
-use std::process::Command as ProcessCommand;
+use std::io::{stdin, Read, Write};
+use std::process::{Command as ProcessCommand, Stdio};
 
 pub struct Command<'a> {
     name: &'a str,
@@ -51,7 +52,7 @@ impl fmt::Display for Argument<'_> {
 pub struct Executor {}
 
 impl Executor {
-    pub fn execute(cmd: Command) -> Result<(), String> {
+    pub fn execute(cmd: Command, pipe_stdin: bool) -> Result<(), String> {
         let mut args = vec![cmd.name];
         args.append(
             cmd.args
@@ -69,8 +70,26 @@ impl Executor {
 
         let mut child = ProcessCommand::new(ZOKRATES_BIN)
             .args(args)
+            .stdin(Stdio::piped())
             .spawn()
             .expect("Could not spawn child process");
+
+        if pipe_stdin {
+            let mut stdin = stdin();
+            let mut input = String::new();
+            let child_stdin = child.stdin.as_mut().expect("Failed to open stdin");
+
+            match stdin.read_to_string(&mut input) {
+                Ok(_) => {
+                    child_stdin
+                        .write_all(input.as_bytes())
+                        .expect("Failed to write to stdin");
+                    child_stdin.flush().expect("Could not flush stdin");
+                    Ok(())
+                }
+                Err(e) => Err(format!("Could not read stdin: {}", e)),
+            }?;
+        }
 
         let status = child
             .wait()

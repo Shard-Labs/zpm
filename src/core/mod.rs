@@ -14,8 +14,6 @@ pub struct Config {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct General {
     pub name: String,
-    pub target_dir: String,
-    pub source_dir: String,
     pub entry: String,
 }
 
@@ -38,8 +36,6 @@ impl General {
     pub fn new(name: String) -> Self {
         General {
             name,
-            target_dir: constants::DEFAULT_TARGET_DIR.to_string(),
-            source_dir: constants::DEFAULT_SOURCE_DIR.to_string(),
             entry: constants::DEFAULT_ENTRY.to_string(),
         }
     }

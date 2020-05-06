@@ -1,3 +1,4 @@
+use crate::core::constants::{DEFAULT_SOURCE_DIR, DEFAULT_TARGET_DIR};
 use crate::core::Config;
 use std::env;
 use std::fs::File;
@@ -25,8 +26,8 @@ pub fn create(config: Config) -> Result<(), String> {
         .write(writer)
         .map_err(|e| format!("Could not write to {}: {}", config_path.display(), e))?;
 
-    let source_dir_path = root.clone().join(config.general.source_dir.as_str());
-    let target_dir_path = root.clone().join(config.general.target_dir.as_str());
+    let source_dir_path = root.clone().join(DEFAULT_SOURCE_DIR);
+    let target_dir_path = root.clone().join(DEFAULT_TARGET_DIR);
 
     std::fs::create_dir(&source_dir_path).map_err(|why| {
         format!(

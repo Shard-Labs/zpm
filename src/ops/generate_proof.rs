@@ -1,9 +1,10 @@
+use crate::core::constants::DEFAULT_TARGET_DIR;
 use crate::core::executor::{Argument, Command, Executor};
 use crate::core::Config;
 use std::path::PathBuf;
 
 pub fn generate_proof(config: Config) -> Result<(), String> {
-    let target = PathBuf::from(config.general.target_dir);
+    let target = PathBuf::from(DEFAULT_TARGET_DIR);
 
     let input = target.clone().join("out").into_os_string();
     let witness = target.clone().join("witness").into_os_string();
@@ -21,5 +22,5 @@ pub fn generate_proof(config: Config) -> Result<(), String> {
         vec![input, witness, pk_path, proof_path, proving_scheme],
     );
 
-    Executor::execute(cmd)
+    Executor::execute(cmd, false)
 }

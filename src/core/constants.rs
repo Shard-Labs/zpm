@@ -1,4 +1,5 @@
-pub(crate) const ZOKRATES_BIN: &'static str = "zokrates";
+pub const ZOKRATES_BIN: &'static str = "zokrates";
+pub const CONFIG_DEFAULT_PATH: &str = "config.zcf";
 
 // general
 pub const DEFAULT_TARGET_DIR: &str = "target";
