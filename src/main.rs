@@ -1,6 +1,6 @@
 #[macro_use]
 extern crate log;
-extern crate pretty_env_logger;
+extern crate env_logger;
 
 use clap::{App, AppSettings, Arg, SubCommand};
 use std::env;
@@ -19,12 +19,24 @@ use crate::ops::setup::setup;
 
 use crate::core::constants::CONFIG_DEFAULT_PATH;
 use crate::core::Config;
+use log::LevelFilter;
 use std::fs::File;
+use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 
 fn main() {
-    pretty_env_logger::formatted_builder()
-        .parse_filters(&env::var("RUST_LOG").unwrap_or("info".to_string()))
+    let level = env::var("RUST_LOG").unwrap_or("info".to_string());
+    env_logger::builder()
+        .format(|f, record| {
+            writeln!(
+                f,
+                "{: <5} zpm: {}",
+                f.default_styled_level(record.level()),
+                record.args()
+            )
+        })
+        .filter_level(LevelFilter::from_str(&level).unwrap())
         .init();
 
     cli().unwrap_or_else(|e| {

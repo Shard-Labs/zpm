@@ -13,7 +13,7 @@ pub fn clean() -> Result<(), String> {
 
     for path in paths {
         let file_path = path.unwrap().path();
-        info!("Removing {}", file_path.display());
+        debug!("Removing {}", file_path.display());
 
         std::fs::remove_file(&file_path)
             .map_err(|e| format!("Could not remove {}: {}", file_path.display(), e))?;

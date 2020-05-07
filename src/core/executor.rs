@@ -23,6 +23,12 @@ impl<'a> Argument<'a> {
     pub fn new(key: &'a str, value: Option<&'a str>) -> Self {
         Argument { key, value }
     }
+    pub fn to_vec(&self) -> Vec<&str> {
+        match self.value {
+            Some(value) => vec![self.key, value],
+            None => vec![self.key],
+        }
+    }
 }
 
 impl fmt::Display for Command<'_> {
@@ -42,10 +48,7 @@ impl fmt::Display for Command<'_> {
 
 impl fmt::Display for Argument<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.value {
-            Some(_) => write!(f, "{} {}", self.key, self.value.unwrap()),
-            None => write!(f, "{}", self.key),
-        }
+        write!(f, "{}", self.to_vec().join(" "))
     }
 }
 
@@ -57,10 +60,7 @@ impl Executor {
         args.append(
             cmd.args
                 .iter()
-                .map(|a| match a.value {
-                    Some(_) => vec![a.key, a.value.unwrap()],
-                    None => vec![a.key],
-                })
+                .map(|a| a.to_vec())
                 .flatten()
                 .collect::<Vec<&str>>()
                 .as_mut(),
@@ -75,12 +75,20 @@ impl Executor {
             .expect("Could not spawn child process");
 
         if pipe_stdin {
+            debug!(
+                "Executing child process with piped stdin (id: {})",
+                child.id()
+            );
             let mut stdin = stdin();
             let mut input = String::new();
             let child_stdin = child.stdin.as_mut().expect("Failed to open stdin");
 
             match stdin.read_to_string(&mut input) {
                 Ok(_) => {
+                    debug!(
+                        "Writing {} bytes to child stdin stream",
+                        input.as_bytes().len()
+                    );
                     child_stdin
                         .write_all(input.as_bytes())
                         .expect("Failed to write to stdin");
@@ -96,11 +104,12 @@ impl Executor {
             .expect("Could not get exit status from child process");
 
         if status.success() {
+            debug!("Child process exited with code: 0");
             Ok(())
         } else {
             match status.code() {
-                Some(code) => Err(format!("Exited with status code: {}", code)),
-                None => Err("Process terminated by signal".to_string()),
+                Some(code) => Err(format!("Child process exited with code: {}", code)),
+                None => Err("Child process terminated by signal".to_string()),
             }
         }
     }
