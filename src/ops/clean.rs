@@ -1,8 +1,8 @@
 use crate::core::constants::DEFAULT_TARGET_DIR;
-use std::path::PathBuf;
+use std::path::Path;
 
 pub fn clean() -> Result<(), String> {
-    let target = PathBuf::from(DEFAULT_TARGET_DIR);
+    let target = Path::new(DEFAULT_TARGET_DIR);
     let paths = std::fs::read_dir(&target).map_err(|e| {
         format!(
             "Could not read files from target directory ({}): {}",
