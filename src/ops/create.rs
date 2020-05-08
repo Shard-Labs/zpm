@@ -1,17 +1,20 @@
 use crate::core::constants::{DEFAULT_SOURCE_DIR, DEFAULT_TARGET_DIR};
 use crate::core::Config;
-use std::env;
 use std::fs::File;
 use std::io::BufWriter;
 use std::path::PathBuf;
+use clap::ArgMatches;
 
-pub fn create(config: Config) -> Result<(), String> {
-    debug!("Creating project: {}", config.general.name);
+pub fn create(matches: &ArgMatches) -> Result<(), String> {
+    let name = matches.value_of("name").unwrap();
+    let path = matches.value_of("path").unwrap();
 
-    let root = PathBuf::from(env::current_dir().unwrap()).join(config.general.name.as_str());
+    debug!("Creating project: {}", name);
+
+    let root = PathBuf::from(path).join(name.clone());
     debug!("Creating project root directory: {}", root.display());
 
-    std::fs::create_dir(&root).map_err(|why| {
+    std::fs::create_dir_all(&root).map_err(|why| {
         format!(
             "Could not create project directory ({}): {}",
             root.display(),
@@ -41,11 +44,7 @@ pub fn create(config: Config) -> Result<(), String> {
         )
     })?;
 
-    let entry_path = source_dir_path.clone().join(config.general.entry.as_str());
-
-    debug!("Writing: {}", entry_path.display());
-    std::fs::write(&entry_path, "def main() -> ():\n    return")
-        .map_err(|e| format!("Could not create {}: {}", entry_path.display(), e))?;
+    let config = Config::new(name.to_string());
 
     let config_path = root.clone().join("config.zcf");
     let config_file = File::create(&config_path)
@@ -56,6 +55,12 @@ pub fn create(config: Config) -> Result<(), String> {
     config
         .write(writer)
         .map_err(|e| format!("Could not write to {}: {}", config_path.display(), e))?;
+
+    let entry_path = source_dir_path.clone().join(config.general.entry.as_str());
+
+    debug!("Writing: {}", entry_path.display());
+    std::fs::write(&entry_path, "def main() -> ():\n    return")
+        .map_err(|e| format!("Could not create {}: {}", entry_path.display(), e))?;
 
     let gitignore = root.clone().join(".gitignore");
 
