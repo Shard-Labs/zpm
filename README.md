@@ -16,7 +16,7 @@ zpm create <name> <path>
 ```
 
 ### compile
-Compiles the project
+Compiles the code into flattened conditions
 
 Artifacts:
 * `target/out`
@@ -43,8 +43,18 @@ Arguments:
 
 Artifacts:
 * `target/witness`
+
+Compute with inline arguments:
 ```
 zpm compute -a 1 2
+```
+
+Or pass arguments to the stdin as json:
+```
+echo [\"1\",\"2\"] | zpm compute --stdin
+
+# inputs.json -> ["1","2"]
+cat inputs.json | zpm compute --stdin
 ```
 
 ### export-verifier
