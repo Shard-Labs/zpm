@@ -1,7 +1,13 @@
 # ZPM
 [![CircleCI](https://circleci.com/gh/Shard-Labs/zpm.svg?style=shield)](https://circleci.com/gh/Shard-Labs/zpm)
 
-Github Repository: [https://github.com/dark64/zpm](https://github.com/dark64/zpm)
+Navigate to official [ZoKrates](https://github.com/Zokrates/ZoKrates) repository and follow the instructions on how to install ZoKrates.
+
+Before running this tool, make sure zokrates is added to PATH:
+```bash
+export PATH=$PATH:$HOME/.zokrates/bin
+export ZOKRATES_HOME=$HOME/.zokrates/stdlib
+```
 
 ## Commands
 
