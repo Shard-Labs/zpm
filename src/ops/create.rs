@@ -1,9 +1,9 @@
 use crate::core::constants::{DEFAULT_SOURCE_DIR, DEFAULT_TARGET_DIR};
 use crate::core::Config;
+use clap::ArgMatches;
 use std::fs::File;
 use std::io::BufWriter;
 use std::path::PathBuf;
-use clap::ArgMatches;
 
 pub fn create(matches: &ArgMatches) -> Result<(), String> {
     let name = matches.value_of("name").unwrap();

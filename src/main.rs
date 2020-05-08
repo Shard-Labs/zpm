@@ -92,13 +92,14 @@ fn cli() -> Result<(), String> {
                         .help("Sets the project name")
                         .takes_value(true)
                         .required(true),
-                ).arg(
-                Arg::with_name("path")
-                    .value_name("path")
-                    .help("Sets the project path")
-                    .takes_value(true)
-                    .required(true)
-                    .default_value(".")
+                )
+                .arg(
+                    Arg::with_name("path")
+                        .value_name("path")
+                        .help("Sets the project path")
+                        .takes_value(true)
+                        .required(true)
+                        .default_value("."),
                 ),
         )
         .subcommand(
@@ -155,9 +156,7 @@ fn cli() -> Result<(), String> {
     }?;
 
     match matches.subcommand() {
-        ("create", Some(sub_matches)) => {
-            create(sub_matches)?
-        }
+        ("create", Some(sub_matches)) => create(sub_matches)?,
         ("compile", _) => {
             let config: Config = read_config(matches.value_of("config-path").unwrap())
                 .map_err(|e| format!("{}", e))?;

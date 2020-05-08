@@ -1,4 +1,5 @@
 # ZPM
+[![CircleCI](https://circleci.com/gh/Shard-Labs/zpm.svg?style=shield)](https://circleci.com/gh/Shard-Labs/zpm)
 
 Github Repository: [https://github.com/dark64/zpm](https://github.com/dark64/zpm)
 
