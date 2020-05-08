@@ -1,0 +1,36 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: rustlang/rust:nightly-slim
+    steps:
+      - checkout
+      - run: rustc --version; cargo --version; rustup --version
+      - restore_cache:
+          keys:
+            - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run:
+          name: Build
+          command: RUSTFLAGS="-D warnings" cargo build --release
+      - save_cache:
+          paths:
+            - /usr/local/cargo/registry
+            - target/debug/.fingerprint
+            - target/debug/build
+            - target/debug/deps
+          key: v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+  test:
+    docker:
+      - image: rustlang/rust:nightly-slim
+    steps:
+      - checkout
+      - run: rustc --version; cargo --version; rustup --version
+      - run:
+          name: Check format
+          command: rustup component add rustfmt; cargo fmt --all -- --check
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build
+      - test
