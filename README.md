@@ -88,6 +88,12 @@ Cleans target directory
 zpm clean
 ```
 
+### verify
+Verifies a proof natively
+```
+zpm verify
+```
+
 ## ZoKrates Configuration File (zcf)
 
 ```
@@ -104,9 +110,9 @@ proving_scheme = 'g16' # verifiable computation scheme
 
 ## Improvements
 1. Instability caused by different versions - By default, zpm uses zokrates binary from the `PATH` env variable to execute the commands. In case zokrates cli changes, zpm needs to be updated accordingly. One way to solve this it to have zpm manage the versions of zokrates instead of using user installed version of zokrates.
-3. Add silent flag for silencing zokrates stdin/stderr.
-5. `zpm create` should cleanup if something fails.
-6. Add a test case if curve or proof system changes halfway through.
+2. Add silent flag for silencing zokrates stdin/stderr.
+3. `zpm create` should cleanup if something fails.
+4. Add a test case if curve or proof system changes halfway through.
 
 
 ## Development

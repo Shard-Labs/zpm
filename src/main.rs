@@ -19,6 +19,7 @@ use crate::ops::setup::setup;
 
 use crate::core::constants::CONFIG_DEFAULT_PATH;
 use crate::core::Config;
+use crate::ops::verify::verify;
 use log::LevelFilter;
 use std::fs::File;
 use std::io::Write;
@@ -144,9 +145,14 @@ fn cli() -> Result<(), String> {
                 .display_order(5),
         )
         .subcommand(
+            SubCommand::with_name("verify")
+                .about("Verifies a proof (natively)")
+                .display_order(6),
+        )
+        .subcommand(
             SubCommand::with_name("clean")
                 .about("Cleans target directory")
-                .display_order(6),
+                .display_order(7),
         )
         .get_matches();
 
@@ -181,6 +187,12 @@ fn cli() -> Result<(), String> {
                 .map_err(|e| format!("{}", e))?;
 
             generate_proof(config)?
+        }
+        ("verify", _) => {
+            let config: Config = read_config(matches.value_of("config-path").unwrap())
+                .map_err(|e| format!("{}", e))?;
+
+            verify(config)?
         }
         ("clean", _) => clean()?,
         _ => unreachable!(),
