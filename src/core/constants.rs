@@ -1,5 +1,6 @@
-pub const ZOKRATES_BIN: &'static str = "zokrates";
-pub const CONFIG_DEFAULT_PATH: &str = "config.zcf";
+pub const ZOKRATES_PATH: &str = ".zokrates/bin";
+pub const ZOKRATES_BIN: &str = "zokrates";
+pub const CONFIG_PATH: &str = "config.zcf";
 
 // general
 pub const DEFAULT_TARGET_DIR: &str = "target";

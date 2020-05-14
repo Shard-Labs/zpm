@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate log;
+extern crate dirs;
 extern crate env_logger;
 
 use clap::{App, AppSettings, Arg, SubCommand};
@@ -17,13 +18,13 @@ use crate::ops::export_verifier::export_verifier;
 use crate::ops::generate_proof::generate_proof;
 use crate::ops::setup::setup;
 
-use crate::core::constants::CONFIG_DEFAULT_PATH;
+use crate::core::constants::CONFIG_PATH;
 use crate::core::Config;
 use crate::ops::verify::verify;
 use log::LevelFilter;
 use std::fs::File;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::str::FromStr;
 
 fn main() {
@@ -40,21 +41,12 @@ fn main() {
         .filter_level(LevelFilter::from_str(&level).unwrap())
         .init();
 
+    debug!("RUST_LOG={}", level);
+
     cli().unwrap_or_else(|e| {
         error!("{}", e);
         std::process::exit(1);
     })
-}
-
-fn check_path_env(path: &str) -> Result<bool, String> {
-    std::env::var("PATH")
-        .and_then(|paths| {
-            Ok(paths
-                .split(":")
-                .map(|p| format!("{}/{}", p, path))
-                .any(|p| Path::new(&p).exists()))
-        })
-        .map_err(|e| format!("Error in $PATH: {}", e))
 }
 
 fn read_config(path: &str) -> Result<Config, String> {
@@ -81,7 +73,7 @@ fn cli() -> Result<(), String> {
                 .takes_value(true)
                 .value_name("path")
                 .required(false)
-                .default_value(CONFIG_DEFAULT_PATH),
+                .default_value(CONFIG_PATH),
         )
         .subcommand(
             SubCommand::with_name("create")
@@ -155,11 +147,6 @@ fn cli() -> Result<(), String> {
                 .display_order(7),
         )
         .get_matches();
-
-    match check_path_env("zokrates")? {
-        false => Err("Could not find zokrates binary in $PATH"),
-        _ => Ok(()),
-    }?;
 
     match matches.subcommand() {
         ("create", Some(sub_matches)) => create(sub_matches)?,

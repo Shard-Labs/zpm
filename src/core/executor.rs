@@ -1,6 +1,7 @@
-use crate::core::constants::ZOKRATES_BIN;
+use crate::core::constants::{ZOKRATES_BIN, ZOKRATES_PATH};
 use std::fmt;
 use std::io::{stdin, Read, Write};
+use std::path::PathBuf;
 use std::process::{Command as ProcessCommand, Stdio};
 
 pub struct Command<'a> {
@@ -66,13 +67,23 @@ impl Executor {
                 .as_mut(),
         );
 
+        let zokrates_path = std::env::var("ZPM_ZOKRATES_PATH")
+            .map(|p| PathBuf::from(p))
+            .unwrap_or(dirs::home_dir().unwrap().join(ZOKRATES_PATH));
+
+        debug!("ZPM_ZOKRATES_PATH={}", zokrates_path.display());
+
+        let zokrates_bin = std::fs::canonicalize(&zokrates_path)
+            .map_err(|e| format!("{}: {}", zokrates_path.display(), e))?
+            .join(ZOKRATES_BIN);
+
         info!("{} {}", ZOKRATES_BIN, cmd);
 
-        let mut child = ProcessCommand::new(ZOKRATES_BIN)
+        let mut child = ProcessCommand::new(&zokrates_bin)
             .args(args)
             .stdin(Stdio::piped())
             .spawn()
-            .expect("Could not spawn child process");
+            .map_err(|e| format!("{}: {}", zokrates_bin.display(), e))?;
 
         if pipe_stdin {
             debug!(
@@ -89,10 +100,15 @@ impl Executor {
                         "Writing {} bytes to child stdin stream",
                         input.as_bytes().len()
                     );
+
                     child_stdin
                         .write_all(input.as_bytes())
-                        .expect("Failed to write to stdin");
-                    child_stdin.flush().expect("Could not flush stdin");
+                        .map_err(|e| format!("Failed to write to stdin: {}", e))?;
+
+                    child_stdin
+                        .flush()
+                        .map_err(|e| format!("Could not flush stdin: {}", e))?;
+
                     Ok(())
                 }
                 Err(e) => Err(format!("Could not read stdin: {}", e)),
@@ -101,7 +117,7 @@ impl Executor {
 
         let status = child
             .wait()
-            .expect("Could not get exit status from child process");
+            .map_err(|_| "Could not get exit status from child process")?;
 
         if status.success() {
             debug!("Child process exited with code: 0");

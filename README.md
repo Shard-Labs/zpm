@@ -3,12 +3,6 @@
 
 Navigate to official [ZoKrates](https://github.com/Zokrates/ZoKrates) repository and follow the instructions on how to install ZoKrates.
 
-Before running this tool, make sure zokrates is added to PATH:
-```bash
-export PATH=$PATH:$HOME/.zokrates/bin
-export ZOKRATES_HOME=$HOME/.zokrates/stdlib
-```
-
 ## Commands
 
 ### create
@@ -56,7 +50,7 @@ Compute with inline arguments:
 zpm compute -a 1 2
 ```
 
-Or pass arguments to the stdin as json:
+Or pass arguments to stdin as json:
 ```
 echo [\"1\",\"2\"] | zpm compute --stdin
 
@@ -108,11 +102,16 @@ elliptic_curve = 'bn128' # elliptic curve to use
 proving_scheme = 'g16' # verifiable computation scheme
 ```
 
+## Environment
+
+* `RUST_LOG` - Controls logging level. See [Enable logging](https://docs.rs/env_logger/0.7.1/env_logger/#enabling-logging) for more details. (default: `info`)
+* `ZPM_ZOKRATES_PATH` - Path to zokrates bin directory (default: `$HOME/.zokrates/bin`)
+
+
 ## Improvements
-1. Instability caused by different versions - By default, zpm uses zokrates binary from the `PATH` env variable to execute the commands. In case zokrates cli changes, zpm needs to be updated accordingly. One way to solve this it to have zpm manage the versions of zokrates instead of using user installed version of zokrates.
-2. Add silent flag for silencing zokrates stdin/stderr.
-3. `zpm create` should cleanup if something fails.
-4. Add a test case if curve or proof system changes halfway through.
+1. Add silent flag for silencing zokrates stdin/stderr.
+2. `zpm create` should cleanup if something fails.
+3. Add a test case if curve or proof system changes halfway through.
 
 
 ## Development
