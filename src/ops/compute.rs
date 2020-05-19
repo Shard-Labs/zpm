@@ -12,6 +12,7 @@ pub fn compute(matches: &ArgMatches) -> Result<(), String> {
     let input = Argument::new("-i", Some(input.to_str().unwrap()));
     let output = Argument::new("-o", Some(output.to_str().unwrap()));
 
+    const COMPUTE_WITNESS: &str = "compute-witness";
     match matches.is_present("stdin") {
         true => {
             let abi_spec = target.clone().join("abi.json").into_os_string();
@@ -20,7 +21,7 @@ pub fn compute(matches: &ArgMatches) -> Result<(), String> {
             let abi = Argument::new("--abi", None);
             let abi_spec = Argument::new("-s", Some(abi_spec.to_str().unwrap()));
 
-            let cmd = Command::new("compute-witness", vec![input, output, abi_spec, abi, stdin]);
+            let cmd = Command::new(COMPUTE_WITNESS, vec![input, output, abi_spec, abi, stdin]);
             Executor::execute(cmd, true)
         }
         false => {
@@ -31,10 +32,10 @@ pub fn compute(matches: &ArgMatches) -> Result<(), String> {
                 for x in args {
                     arguments.push(Argument::new(x, None));
                 }
-                let cmd = Command::new("compute-witness", arguments);
+                let cmd = Command::new(COMPUTE_WITNESS, arguments);
                 Executor::execute(cmd, false)
             } else {
-                let cmd = Command::new("compute-witness", vec![input, output]);
+                let cmd = Command::new(COMPUTE_WITNESS, vec![input, output]);
                 Executor::execute(cmd, false)
             }
         }

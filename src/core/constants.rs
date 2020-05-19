@@ -1,3 +1,6 @@
+// env
+pub const ZPM_ZOKRATES_PATH: &str = "ZPM_ZOKRATES_PATH";
+
 pub const ZOKRATES_PATH: &str = ".zokrates/bin";
 pub const ZOKRATES_BIN: &str = "zokrates";
 pub const CONFIG_PATH: &str = "config.zcf";

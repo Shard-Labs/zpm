@@ -1,4 +1,4 @@
-use crate::core::constants::{ZOKRATES_BIN, ZOKRATES_PATH};
+use crate::core::constants::{ZOKRATES_BIN, ZOKRATES_PATH, ZPM_ZOKRATES_PATH};
 use std::fmt;
 use std::io::{stdin, Read, Write};
 use std::path::PathBuf;
@@ -67,11 +67,11 @@ impl Executor {
                 .as_mut(),
         );
 
-        let zokrates_path = std::env::var("ZPM_ZOKRATES_PATH")
+        let zokrates_path = std::env::var(ZPM_ZOKRATES_PATH)
             .map(|p| PathBuf::from(p))
             .unwrap_or(dirs::home_dir().unwrap().join(ZOKRATES_PATH));
 
-        debug!("ZPM_ZOKRATES_PATH={}", zokrates_path.display());
+        debug!("{}={}", ZPM_ZOKRATES_PATH, zokrates_path.display());
 
         let zokrates_bin = std::fs::canonicalize(&zokrates_path)
             .map_err(|e| format!("{}: {}", zokrates_path.display(), e))?
