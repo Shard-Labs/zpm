@@ -14,8 +14,10 @@ pub fn setup(config: Config) -> Result<(), String> {
     let input = Argument::new("-i", Some(input.to_str().unwrap()));
     let vk_path = Argument::new("-v", Some(vk_path.to_str().unwrap()));
     let pk_path = Argument::new("-p", Some(pk_path.to_str().unwrap()));
+
+    let backend = Argument::new("-b", Some(config.crypto.backend.as_str()));
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
 
-    let cmd = Command::new("setup", vec![input, vk_path, pk_path, proving_scheme]);
+    let cmd = Command::new("setup", vec![input, vk_path, pk_path, backend, proving_scheme]);
     Executor::execute(cmd, false)
 }

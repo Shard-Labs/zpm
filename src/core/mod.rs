@@ -19,6 +19,7 @@ pub struct General {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Crypto {
+    pub backend: String,
     pub elliptic_curve: String,
     pub proving_scheme: String,
 }
@@ -26,6 +27,7 @@ pub struct Crypto {
 impl Default for Crypto {
     fn default() -> Self {
         Crypto {
+            backend: constants::DEFAULT_BACKEND.to_string(),
             elliptic_curve: constants::DEFAULT_ELLIPTIC_CURVE.to_string(),
             proving_scheme: constants::DEFAULT_PROVING_SCHEME.to_string(),
         }

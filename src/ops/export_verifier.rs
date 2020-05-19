@@ -12,12 +12,13 @@ pub fn export_verifier(config: Config) -> Result<(), String> {
     let input = Argument::new("-i", Some(input.to_str().unwrap()));
     let output = Argument::new("-o", Some(output.to_str().unwrap()));
 
-    let curve = Argument::new("-c", Some(config.crypto.elliptic_curve.as_str()));
+    let backend = Argument::new("-b", Some(config.crypto.backend.as_str()));
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
+    let curve = Argument::new("-c", Some(config.crypto.elliptic_curve.as_str()));
 
     let cmd = Command::new(
         "export-verifier",
-        vec![input, output, curve, proving_scheme],
+        vec![input, output, backend, proving_scheme, curve],
     );
 
     Executor::execute(cmd, false)
