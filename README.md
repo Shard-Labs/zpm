@@ -41,6 +41,7 @@ Calculates a witness for a given constraint system
 
 Arguments:
 * `-a, --arguments` - Arguments for the compiled program
+* `--stdin` - Pass arguments as json to stdin
 
 Artifacts:
 * `target/witness`
