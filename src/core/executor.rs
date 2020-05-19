@@ -90,9 +90,14 @@ impl Executor {
                 "Executing child process with piped stdin (id: {})",
                 child.id()
             );
+
             let mut stdin = stdin();
             let mut input = String::new();
-            let child_stdin = child.stdin.as_mut().expect("Failed to open stdin");
+
+            let child_stdin = child
+                .stdin
+                .as_mut()
+                .ok_or(format!("Failed to open stdin"))?;
 
             match stdin.read_to_string(&mut input) {
                 Ok(_) => {
@@ -120,7 +125,7 @@ impl Executor {
             .map_err(|_| "Could not get exit status from child process")?;
 
         if status.success() {
-            debug!("Child process exited with code: 0");
+            debug!("Child process exited with code: {}", status.code().unwrap());
             Ok(())
         } else {
             match status.code() {
