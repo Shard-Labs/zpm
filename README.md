@@ -110,9 +110,7 @@ proving_scheme = 'g16' # verifiable computation scheme
 
 
 ## Improvements
-1. Add silent flag for silencing zokrates stdin/stderr.
-2. `zpm create` should cleanup if something fails.
-3. Add a test case if curve or proof system changes halfway through.
+1. Add a test case if curve or proof system changes halfway through.
 
 
 ## Development
