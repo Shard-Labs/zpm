@@ -25,9 +25,15 @@ jobs:
     steps:
       - checkout
       - run: rustc --version; cargo --version; rustup --version
+      - restore_cache:
+          keys:
+            - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Check format
           command: rustup component add rustfmt; cargo fmt --all -- --check
+      - run:
+          name: Run tests
+          command: RUSTFLAGS="-D warnings" cargo test --release
 workflows:
   version: 2
   main:
