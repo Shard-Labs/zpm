@@ -3,7 +3,7 @@ use crate::core::executor::{Argument, Command, Executor};
 use crate::core::Config;
 use std::path::PathBuf;
 
-pub fn generate_proof(config: Config) -> Result<(), String> {
+pub fn generate_proof<E: Executor>(config: Config) -> Result<E::ExecutorResult, String> {
     let target = PathBuf::from(DEFAULT_TARGET_DIR);
 
     let input = target.clone().join("out").into_os_string();
@@ -19,10 +19,34 @@ pub fn generate_proof(config: Config) -> Result<(), String> {
     let backend = Argument::new("-b", Some(config.crypto.backend.as_str()));
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
 
-    let cmd = Command::new(
-        "generate-proof",
-        vec![input, witness, pk_path, proof_path, backend, proving_scheme],
-    );
+    let cmd = Command::new("generate-proof")
+        .args(vec![
+            input,
+            witness,
+            pk_path,
+            proof_path,
+            backend,
+            proving_scheme,
+        ])
+        .build();
 
-    Executor::execute(cmd, false)
+    E::execute(cmd)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::executor::tests::TestingExecutor;
+    use crate::core::Config;
+    use crate::ops::generate_proof::generate_proof;
+
+    #[test]
+    fn generate_proof_command() {
+        let config = Config::new("test".to_string());
+        let cmd = generate_proof::<TestingExecutor>(config).unwrap();
+
+        assert_eq!(
+            cmd,
+            "generate-proof -i target/out -w target/witness -p target/proving.key -j target/proof.json -b bellman -s g16"
+        )
+    }
 }

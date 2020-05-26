@@ -5,19 +5,19 @@ use std::io::{Read, Write};
 pub mod constants;
 pub mod executor;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Config {
     pub general: General,
     pub crypto: Crypto,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct General {
     pub name: String,
     pub entry: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Crypto {
     pub backend: String,
     pub elliptic_curve: String,
@@ -64,5 +64,24 @@ impl Config {
 
         let config: Config = toml::from_str(toml.as_str())?;
         Ok(config)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::Config;
+
+    #[test]
+    fn serialize_config() {
+        let config = Config::new("test".to_string());
+        let mut tmp = Vec::new();
+        config.write(&mut tmp).unwrap();
+
+        assert!(tmp.len() > 0);
+
+        let toml = String::from_utf8(tmp).unwrap();
+        let deserialized_config = Config::read(toml.as_bytes()).unwrap();
+
+        assert_eq!(config, deserialized_config);
     }
 }

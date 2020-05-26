@@ -81,3 +81,22 @@ pub fn create(matches: &ArgMatches) -> Result<(), String> {
 
     result
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::create_app;
+    use crate::ops::create::create;
+    use tempdir::TempDir;
+
+    #[test]
+    fn create_command() {
+        let tmp_dir = TempDir::new(".tmp").unwrap();
+        let arg_vec = vec!["zpm", "create", "test", tmp_dir.path().to_str().unwrap()];
+
+        let app = create_app();
+        let matches = app.get_matches_from_safe(arg_vec).unwrap();
+
+        let submatches = matches.subcommand_matches("create").unwrap();
+        assert!(create(submatches).is_ok());
+    }
+}

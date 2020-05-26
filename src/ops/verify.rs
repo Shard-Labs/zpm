@@ -3,7 +3,7 @@ use crate::core::executor::{Argument, Command, Executor};
 use crate::core::Config;
 use std::path::PathBuf;
 
-pub fn verify(config: Config) -> Result<(), String> {
+pub fn verify<E: Executor>(config: Config) -> Result<E::ExecutorResult, String> {
     let target = PathBuf::from(DEFAULT_TARGET_DIR);
 
     let vk_path = target.clone().join("verification.key").into_os_string();
@@ -16,9 +16,27 @@ pub fn verify(config: Config) -> Result<(), String> {
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
     let curve = Argument::new("-c", Some(config.crypto.elliptic_curve.as_str()));
 
-    let cmd = Command::new(
-        "verify",
-        vec![proof_path, vk_path, backend, proving_scheme, curve],
-    );
-    Executor::execute(cmd, false)
+    let cmd = Command::new("verify")
+        .args(vec![proof_path, vk_path, backend, proving_scheme, curve])
+        .build();
+
+    E::execute(cmd)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::executor::tests::TestingExecutor;
+    use crate::core::Config;
+    use crate::ops::verify::verify;
+
+    #[test]
+    fn verify_command() {
+        let config = Config::new("test".to_string());
+        let cmd = verify::<TestingExecutor>(config).unwrap();
+
+        assert_eq!(
+            cmd,
+            "verify -j target/proof.json -v target/verification.key -b bellman -s g16 -c bn128"
+        )
+    }
 }

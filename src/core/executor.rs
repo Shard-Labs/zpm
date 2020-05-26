@@ -4,19 +4,41 @@ use std::io::{stdin, Read, Write};
 use std::path::PathBuf;
 use std::process::{Command as ProcessCommand, Stdio};
 
+#[derive(Debug, Clone)]
 pub struct Command<'a> {
     name: &'a str,
     args: Vec<Argument<'a>>,
+    pipe_stdin: bool,
 }
 
+#[derive(Debug, Clone)]
 pub struct Argument<'a> {
     key: &'a str,
     value: Option<&'a str>,
 }
 
 impl<'a> Command<'a> {
-    pub fn new(name: &'a str, args: Vec<Argument<'a>>) -> Self {
-        Command { name, args }
+    pub fn new(name: &'a str) -> Command {
+        Command {
+            name,
+            args: Vec::new(),
+            pipe_stdin: false,
+        }
+    }
+    pub fn args(mut self, args: Vec<Argument<'a>>) -> Self {
+        self.args = args;
+        self
+    }
+    pub fn pipe_stdin(mut self, flag: bool) -> Self {
+        self.pipe_stdin = flag;
+        self
+    }
+    pub fn build(self) -> Self {
+        Command {
+            name: self.name,
+            args: self.args,
+            pipe_stdin: self.pipe_stdin,
+        }
     }
 }
 
@@ -53,10 +75,18 @@ impl fmt::Display for Argument<'_> {
     }
 }
 
-pub struct Executor {}
+pub trait Executor {
+    type ExecutorResult;
 
-impl Executor {
-    pub fn execute(cmd: Command, pipe_stdin: bool) -> Result<(), String> {
+    fn execute(cmd: Command) -> Result<Self::ExecutorResult, String>;
+}
+
+pub struct CommandExecutor;
+
+impl Executor for CommandExecutor {
+    type ExecutorResult = ();
+
+    fn execute(cmd: Command) -> Result<(), String> {
         let mut args = vec![cmd.name];
         args.append(
             cmd.args
@@ -85,7 +115,7 @@ impl Executor {
             .spawn()
             .map_err(|e| format!("{}: {}", zokrates_bin.display(), e))?;
 
-        if pipe_stdin {
+        if cmd.pipe_stdin {
             debug!(
                 "Executing child process with piped stdin (id: {})",
                 child.id()
@@ -132,6 +162,23 @@ impl Executor {
                 Some(code) => Err(format!("Child process exited with code: {}", code)),
                 None => Err("Child process terminated by signal".to_string()),
             }
+        }
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    use crate::core::executor::{Command, Executor};
+
+    pub struct TestingExecutor;
+
+    impl Executor for TestingExecutor {
+        type ExecutorResult = String;
+
+        fn execute(cmd: Command) -> Result<Self::ExecutorResult, String> {
+            let cmd = format!("{}", cmd);
+            println!("{}", cmd);
+            Ok(cmd)
         }
     }
 }

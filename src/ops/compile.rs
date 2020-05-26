@@ -3,7 +3,7 @@ use crate::core::executor::{Argument, Command, Executor};
 use crate::core::Config;
 use std::path::PathBuf;
 
-pub fn compile(config: Config) -> Result<(), String> {
+pub fn compile<E: Executor>(config: Config) -> Result<E::ExecutorResult, String> {
     let input = PathBuf::from(DEFAULT_SOURCE_DIR)
         .join(config.general.entry)
         .into_os_string();
@@ -17,6 +17,27 @@ pub fn compile(config: Config) -> Result<(), String> {
     let abi_spec = Argument::new("-s", Some(abi_spec.to_str().unwrap()));
     let curve = Argument::new("-c", Some(config.crypto.elliptic_curve.as_str()));
 
-    let cmd = Command::new("compile", vec![input, output, abi_spec, curve]);
-    Executor::execute(cmd, false)
+    let cmd = Command::new("compile")
+        .args(vec![input, output, abi_spec, curve])
+        .build();
+
+    E::execute(cmd)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::executor::tests::TestingExecutor;
+    use crate::core::Config;
+    use crate::ops::compile::compile;
+
+    #[test]
+    fn compile_command() {
+        let config = Config::new("test".to_string());
+        let cmd = compile::<TestingExecutor>(config).unwrap();
+
+        assert_eq!(
+            cmd,
+            "compile -i src/main.zok -o target/out -s target/abi.json -c bn128"
+        )
+    }
 }

@@ -3,7 +3,7 @@ use crate::core::executor::{Argument, Command, Executor};
 use crate::core::Config;
 use std::path::PathBuf;
 
-pub fn setup(config: Config) -> Result<(), String> {
+pub fn setup<E: Executor>(config: Config) -> Result<E::ExecutorResult, String> {
     let target = PathBuf::from(DEFAULT_TARGET_DIR);
     let input = target.clone().join("out").into_os_string();
 
@@ -18,9 +18,27 @@ pub fn setup(config: Config) -> Result<(), String> {
     let backend = Argument::new("-b", Some(config.crypto.backend.as_str()));
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
 
-    let cmd = Command::new(
-        "setup",
-        vec![input, vk_path, pk_path, backend, proving_scheme],
-    );
-    Executor::execute(cmd, false)
+    let cmd = Command::new("setup")
+        .args(vec![input, vk_path, pk_path, backend, proving_scheme])
+        .build();
+
+    E::execute(cmd)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::executor::tests::TestingExecutor;
+    use crate::core::Config;
+    use crate::ops::setup::setup;
+
+    #[test]
+    fn setup_command() {
+        let config = Config::new("test".to_string());
+        let cmd = setup::<TestingExecutor>(config).unwrap();
+
+        assert_eq!(
+            cmd,
+            "setup -i target/out -v target/verification.key -p target/proving.key -b bellman -s g16"
+        )
+    }
 }

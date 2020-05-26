@@ -13,3 +13,8 @@ dirs = "2.0"
 env_logger = { version = "0.7.1", features = ["termcolor"] }
 toml = "0.5.6"
 serde = { version = "1.0.106", features = ["derive"] }
+
+[dev-dependencies]
+glob = "0.2.11"
+assert_cli = "0.5"
+tempdir = "0.3"

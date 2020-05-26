@@ -19,6 +19,7 @@ use crate::ops::generate_proof::generate_proof;
 use crate::ops::setup::setup;
 
 use crate::core::constants::CONFIG_PATH;
+use crate::core::executor::CommandExecutor;
 use crate::core::Config;
 use crate::ops::verify::verify;
 use log::LevelFilter;
@@ -49,18 +50,8 @@ fn main() {
     })
 }
 
-fn read_config(path: &str) -> Result<Config, String> {
-    let path = PathBuf::from(path);
-
-    let file = File::open(path.clone())
-        .map_err(|why| format!("Could not open {}: {}", path.display(), why))?;
-
-    let reader = BufReader::new(file);
-    Config::read(reader).map_err(|e| format!("Error in {}: {}", path.display(), e))
-}
-
-fn cli() -> Result<(), String> {
-    let matches = App::new("zpm")
+pub fn create_app<'a, 'b>() -> App<'a, 'b> {
+    App::new("zpm")
         .setting(AppSettings::SubcommandRequiredElseHelp)
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
@@ -146,7 +137,21 @@ fn cli() -> Result<(), String> {
                 .about("Cleans target directory")
                 .display_order(7),
         )
-        .get_matches();
+}
+
+fn read_config(path: &str) -> Result<Config, String> {
+    let path = PathBuf::from(path);
+
+    let file = File::open(path.clone())
+        .map_err(|why| format!("Could not open {}: {}", path.display(), why))?;
+
+    let reader = BufReader::new(file);
+    Config::read(reader).map_err(|e| format!("Error in {}: {}", path.display(), e))
+}
+
+fn cli() -> Result<(), String> {
+    let app = create_app();
+    let matches = app.get_matches();
 
     match matches.subcommand() {
         ("create", Some(sub_matches)) => create(sub_matches)?,
@@ -154,32 +159,32 @@ fn cli() -> Result<(), String> {
             let config: Config = read_config(matches.value_of("config-path").unwrap())
                 .map_err(|e| format!("{}", e))?;
 
-            compile(config)?
+            compile::<CommandExecutor>(config)?
         }
         ("setup", _) => {
             let config: Config = read_config(matches.value_of("config-path").unwrap())
                 .map_err(|e| format!("{}", e))?;
 
-            setup(config)?
+            setup::<CommandExecutor>(config)?
         }
-        ("compute", Some(sub_matches)) => compute(sub_matches)?,
+        ("compute", Some(sub_matches)) => compute::<CommandExecutor>(sub_matches)?,
         ("export-verifier", _) => {
             let config: Config = read_config(matches.value_of("config-path").unwrap())
                 .map_err(|e| format!("{}", e))?;
 
-            export_verifier(config)?
+            export_verifier::<CommandExecutor>(config)?
         }
         ("generate-proof", _) => {
             let config: Config = read_config(matches.value_of("config-path").unwrap())
                 .map_err(|e| format!("{}", e))?;
 
-            generate_proof(config)?
+            generate_proof::<CommandExecutor>(config)?
         }
         ("verify", _) => {
             let config: Config = read_config(matches.value_of("config-path").unwrap())
                 .map_err(|e| format!("{}", e))?;
 
-            verify(config)?
+            verify::<CommandExecutor>(config)?
         }
         ("clean", _) => clean()?,
         _ => unreachable!(),
