@@ -39,7 +39,6 @@ pub fn compute<E: Executor>(matches: &ArgMatches) -> Result<E::ExecutorResult, S
 
                 E::execute(cmd)
             } else {
-                println!("test");
                 let cmd = Command::new("compute-witness")
                     .args(vec![input, output])
                     .build();
