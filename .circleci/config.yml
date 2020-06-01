@@ -19,6 +19,27 @@ jobs:
             - target/debug/build
             - target/debug/deps
           key: v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+  cross_build:
+    docker:
+      - image: rustlang/rust:nightly-slim
+    steps:
+      - checkout
+      - run: rustc --version; cargo --version; rustup --version
+      - run: cargo install cross
+      - restore_cache:
+          keys:
+            - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run:
+          name: Build target x86_64-apple-darwin
+          command: TARGET=x86_64-apple-darwin bash scripts/cross_build.sh
+      - run:
+          name: Build target x86_64-unknown-linux-gnu
+          command: TARGET=x86_64-unknown-linux-gnu bash scripts/cross_build.sh
+      - run:
+          name: Build target x86_64-pc-windows-gnu
+          command: TARGET=x86_64-pc-windows-gnu bash scripts/cross_build.sh
+      - store_artifacts:
+          path: artifacts
   test:
     docker:
       - image: rustlang/rust:nightly-slim
@@ -40,3 +61,9 @@ workflows:
     jobs:
       - build
       - test
+      - cross_build:
+          requires:
+            - test
+          filters:
+            tags:
+              only: /^v.*/
