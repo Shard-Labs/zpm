@@ -15,5 +15,6 @@ zpm setup
 zpm export-verifier
 zpm generate-proof
 zpm verify
+zpm clean
 
 rm -rf $tmp_dir
