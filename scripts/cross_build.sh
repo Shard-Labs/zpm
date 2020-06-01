@@ -1,9 +1,4 @@
 #!/bin/bash
-
-#  x86_64-apple-darwin
-#  x86_64-pc-windows-gnu
-#  x86_64-unknown-linux-gnu
-
 set -e
 
 stage=$(mktemp -d -t cb-XXXXXXXXXX)

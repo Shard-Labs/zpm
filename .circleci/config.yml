@@ -58,11 +58,14 @@ workflows:
   version: 2
   main:
     jobs:
-      # - build
-      # - test
+      - build
+      - test
       - cross_build:
-          # requires:
-          #  - test
+          requires:
+            - build
+            - test
           filters:
             tags:
               only: /^v.*/
+            branches:
+              ignore: /.*/
