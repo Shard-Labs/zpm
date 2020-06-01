@@ -22,7 +22,8 @@ esac
 echo TARGET=$TARGET
 echo TAG=$tag
 
-cross build --target $TARGET --release
+rustup target install $TARGET
+cargo build --target $TARGET --release
 
 cp target/$TARGET/release/$BINARY_NAME $stage/
 cd $stage

@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: rustlang/rust:nightly-slim
+      - image: circleci/rust
     steps:
       - checkout
       - run: rustc --version; cargo --version; rustup --version
@@ -21,28 +21,27 @@ jobs:
           key: v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
   cross_build:
     docker:
-      - image: rustlang/rust:nightly-slim
+      - image: circleci/rust:1-buster
     steps:
       - checkout
       - run: rustc --version; cargo --version; rustup --version
-      - run: cargo install cross
       - restore_cache:
           keys:
             - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
-          name: Build target x86_64-apple-darwin
-          command: TARGET=x86_64-apple-darwin bash scripts/cross_build.sh
-      - run:
           name: Build target x86_64-unknown-linux-gnu
-          command: TARGET=x86_64-unknown-linux-gnu bash scripts/cross_build.sh
+          command: TARGET=x86_64-unknown-linux-musl sh scripts/cross_build.sh
       - run:
           name: Build target x86_64-pc-windows-gnu
-          command: TARGET=x86_64-pc-windows-gnu bash scripts/cross_build.sh
+          command: |
+            sudo apt-get update
+            sudo apt-get install --assume-yes --no-install-recommends g++-mingw-w64-x86-64
+            TARGET=x86_64-pc-windows-gnu sh scripts/cross_build.sh
       - store_artifacts:
           path: artifacts
   test:
     docker:
-      - image: rustlang/rust:nightly-slim
+      - image: circleci/rust
     steps:
       - checkout
       - run: rustc --version; cargo --version; rustup --version
@@ -51,7 +50,7 @@ jobs:
             - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
       - run:
           name: Check format
-          command: "! rustup component add rustfmt || cargo fmt --all -- --check"
+          command: cargo fmt --all -- --check
       - run:
           name: Run tests
           command: RUSTFLAGS="-D warnings" cargo test --release
@@ -59,11 +58,11 @@ workflows:
   version: 2
   main:
     jobs:
-      - build
-      - test
+      # - build
+      # - test
       - cross_build:
-          requires:
-            - test
+          # requires:
+          #  - test
           filters:
             tags:
               only: /^v.*/
