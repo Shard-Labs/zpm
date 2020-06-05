@@ -19,26 +19,6 @@ jobs:
             - target/debug/build
             - target/debug/deps
           key: v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
-  cross_build:
-    docker:
-      - image: circleci/rust:1-buster
-    steps:
-      - checkout
-      - run: rustc --version; cargo --version; rustup --version
-      - restore_cache:
-          keys:
-            - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
-      - run:
-          name: Build target x86_64-unknown-linux-gnu
-          command: TARGET=x86_64-unknown-linux-musl sh scripts/cross_build.sh
-      - run:
-          name: Build target x86_64-pc-windows-gnu
-          command: |
-            sudo apt-get update
-            sudo apt-get install --assume-yes --no-install-recommends g++-mingw-w64-x86-64
-            TARGET=x86_64-pc-windows-gnu sh scripts/cross_build.sh
-      - store_artifacts:
-          path: artifacts
   test:
     docker:
       - image: circleci/rust
@@ -60,12 +40,3 @@ workflows:
     jobs:
       - build
       - test
-      - cross_build:
-          requires:
-            - build
-            - test
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
