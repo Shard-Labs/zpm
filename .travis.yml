@@ -4,6 +4,7 @@ language: rust
 rust:
   - stable
 services: docker
+cache: cargo
 
 matrix:
   include:
@@ -11,10 +12,6 @@ matrix:
     - env: TARGET=x86_64-pc-windows-gnu
     - env: TARGET=x86_64-apple-darwin
       os: osx
-
-before_install:
-  - set -e
-  - rustup self update
 
 install:
   - cargo install cross
@@ -34,5 +31,4 @@ deploy:
 branches:
   only:
     - /^v?\d+\.\d+\.\d+.*$/
-    - cross-build
     - master
