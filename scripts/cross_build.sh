@@ -22,7 +22,8 @@ cross build --target $TARGET --release
 cp target/$TARGET/release/$BINARY_NAME $stage/
 cd $stage
 
-tar czf $src/zpm-$tag-$TARGET.tar.gz *
+mkdir -p $src/artifacts
+tar czf $src/artifacts/zpm-$tag-$TARGET.tar.gz *
 
 cd $src
 rm -rf $stage
