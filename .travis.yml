@@ -23,7 +23,7 @@ deploy:
   provider: releases
   api_key: $TOKEN
   file_glob: true
-  file: artifacts/.*
+  file: zpm-$TRAVIS_TAG-$TARGET.*
   on:
     tags: true
   skip_cleanup: true

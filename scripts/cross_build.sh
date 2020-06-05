@@ -14,16 +14,18 @@ case $TARGET in
         ;;
 esac
 
+release_dir=target/$TARGET/release
+
 echo TARGET=$TARGET
 echo TAG=$tag
+echo RELEASE_DIR=$release_dir
 
 cross build --target $TARGET --release
 
-cp target/$TARGET/release/$BINARY_NAME $stage/
+cp $release_dir/$BINARY_NAME $stage/
 cd $stage
 
-mkdir -p $src/artifacts
-tar czf $src/artifacts/zpm-$tag-$TARGET.tar.gz *
+tar czf $src/zpm-$tag-$TARGET.tar.gz *
 
 cd $src
 rm -rf $stage
