@@ -105,7 +105,6 @@ name = 'example' # project name
 entry = 'main.zok' # entry point
 
 [crypto]
-backend = 'bellman' # backend to use
 elliptic_curve = 'bn128' # elliptic curve to use
 proving_scheme = 'g16' # verifiable computation scheme
 ```

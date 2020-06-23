@@ -34,9 +34,22 @@ jobs:
       - run:
           name: Run tests
           command: RUSTFLAGS="-D warnings" cargo test --release
+  integration_test:
+    docker:
+      - image: circleci/rust
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run: |
+          curl -LSfs get.zokrat.es | sh
+          cargo install --path .
+          sh test.sh
 workflows:
   version: 2
   main:
     jobs:
       - build
       - test
+      - integration_test
