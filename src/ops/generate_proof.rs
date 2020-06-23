@@ -18,13 +18,7 @@ pub fn generate_proof<E: Executor>(config: Config) -> Result<E::ExecutorResult, 
 
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
     let cmd = Command::new("generate-proof")
-        .args(vec![
-            input,
-            witness,
-            pk_path,
-            proof_path,
-            proving_scheme,
-        ])
+        .args(vec![input, witness, pk_path, proof_path, proving_scheme])
         .build();
 
     E::execute(cmd)
