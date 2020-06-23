@@ -53,3 +53,11 @@ workflows:
       - build
       - test
       - integration_test
+          filters:
+            branches:
+              only:
+                - develop
+                - master
+          requires:
+            - build
+            - test

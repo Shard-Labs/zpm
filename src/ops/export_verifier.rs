@@ -12,11 +12,12 @@ pub fn export_verifier<E: Executor>(config: Config) -> Result<E::ExecutorResult,
     let input = Argument::new("-i", Some(input.to_str().unwrap()));
     let output = Argument::new("-o", Some(output.to_str().unwrap()));
 
+    let backend = Argument::new("-b", Some(config.crypto.backend.as_str()));
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
     let curve = Argument::new("-c", Some(config.crypto.elliptic_curve.as_str()));
 
     let cmd = Command::new("export-verifier")
-        .args(vec![input, output, proving_scheme, curve])
+        .args(vec![input, output, backend, proving_scheme, curve])
         .build();
 
     E::execute(cmd)
@@ -35,7 +36,7 @@ mod tests {
 
         assert_eq!(
             cmd,
-            "export-verifier -i target/verification.key -o target/verifier.sol -s g16 -c bn128"
+            "export-verifier -i target/verification.key -o target/verifier.sol -b bellman -s g16 -c bn128"
         )
     }
 }

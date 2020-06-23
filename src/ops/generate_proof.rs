@@ -16,13 +16,16 @@ pub fn generate_proof<E: Executor>(config: Config) -> Result<E::ExecutorResult, 
     let pk_path = Argument::new("-p", Some(pk_path.to_str().unwrap()));
     let proof_path = Argument::new("-j", Some(proof_path.to_str().unwrap()));
 
+    let backend = Argument::new("-b", Some(config.crypto.backend.as_str()));
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
+
     let cmd = Command::new("generate-proof")
         .args(vec![
             input,
             witness,
             pk_path,
             proof_path,
+            backend,
             proving_scheme,
         ])
         .build();
@@ -43,7 +46,7 @@ mod tests {
 
         assert_eq!(
             cmd,
-            "generate-proof -i target/out -w target/witness -p target/proving.key -j target/proof.json -s g16"
+            "generate-proof -i target/out -w target/witness -p target/proving.key -j target/proof.json -b bellman -s g16"
         )
     }
 }

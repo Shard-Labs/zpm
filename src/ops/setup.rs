@@ -15,9 +15,11 @@ pub fn setup<E: Executor>(config: Config) -> Result<E::ExecutorResult, String> {
     let vk_path = Argument::new("-v", Some(vk_path.to_str().unwrap()));
     let pk_path = Argument::new("-p", Some(pk_path.to_str().unwrap()));
 
+    let backend = Argument::new("-b", Some(config.crypto.backend.as_str()));
     let proving_scheme = Argument::new("-s", Some(config.crypto.proving_scheme.as_str()));
+
     let cmd = Command::new("setup")
-        .args(vec![input, vk_path, pk_path, proving_scheme])
+        .args(vec![input, vk_path, pk_path, backend, proving_scheme])
         .build();
 
     E::execute(cmd)
@@ -36,7 +38,7 @@ mod tests {
 
         assert_eq!(
             cmd,
-            "setup -i target/out -v target/verification.key -p target/proving.key -s g16"
+            "setup -i target/out -v target/verification.key -p target/proving.key -b bellman -s g16"
         )
     }
 }
