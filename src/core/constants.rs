@@ -12,4 +12,3 @@ pub const DEFAULT_ENTRY: &str = "main.zok";
 
 // crypto
 pub const DEFAULT_PROVING_SCHEME: &str = "g16";
-pub const DEFAULT_ELLIPTIC_CURVE: &str = "bn128";

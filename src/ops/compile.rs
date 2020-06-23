@@ -15,10 +15,9 @@ pub fn compile<E: Executor>(config: Config) -> Result<E::ExecutorResult, String>
     let input = Argument::new("-i", Some(input.to_str().unwrap()));
     let output = Argument::new("-o", Some(output.to_str().unwrap()));
     let abi_spec = Argument::new("-s", Some(abi_spec.to_str().unwrap()));
-    let curve = Argument::new("-c", Some(config.crypto.elliptic_curve.as_str()));
 
     let cmd = Command::new("compile")
-        .args(vec![input, output, abi_spec, curve])
+        .args(vec![input, output, abi_spec])
         .build();
 
     E::execute(cmd)
@@ -37,7 +36,7 @@ mod tests {
 
         assert_eq!(
             cmd,
-            "compile -i src/main.zok -o target/out -s target/abi.json -c bn128"
+            "compile -i src/main.zok -o target/out -s target/abi.json"
         )
     }
 }
